@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 public class JsonEditor : EditorWindow
 {
-    private JsonData newTemplate = new JsonData();
+    private JsonData newTemplate = new();
 
     [MenuItem("Window/JSON Editor")]
     public static void ShowWindow()
@@ -44,12 +45,45 @@ public class JsonEditor : EditorWindow
         {
             DeleteJsonData();
         }
+
+        if (GUILayout.Button("Instantiate Game Object"))
+        {
+            InstantiateGameObject();
+        }
+    }
+
+    private void InstantiateGameObject()
+    {
+        // Assuming you have a method to get the path of the JSON file
+        string path = GetJsonFilePath();
+
+        if (path.Length != 0)
+        {
+            string jsonString = File.ReadAllText(path);
+            JsonData template = JsonUtility.FromJson<JsonData>(jsonString);
+
+            GameObject obj = new(template.name);
+            obj.transform.position = template.position;
+            obj.transform.eulerAngles = template.rotation;
+            obj.transform.localScale = template.scale;
+
+            // If your JsonData class includes color and you want to apply it to a Renderer
+            if (obj.TryGetComponent<Renderer>(out var renderer))
+            {
+                renderer.material.color = template.color;
+            }
+        }
+    }
+
+    private string GetJsonFilePath()
+    {
+        return EditorUtility.OpenFilePanel("Select JSON File", "", "json");
     }
 
     //Load JSON data
     private void LoadJsonData()
     {
-        string path = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
+        string path = GetJsonFilePath();
         if (path.Length != 0)
         {
             string jsonString = File.ReadAllText(path);
@@ -78,7 +112,7 @@ public class JsonEditor : EditorWindow
     //Delete JSON data
     private void DeleteJsonData()
     {
-        string path = EditorUtility.OpenFilePanel("Select JSON File to Delete", "", "json");
+        string path = GetJsonFilePath();
         if (path.Length != 0 && File.Exists(path))
         {
             File.Delete(path);
