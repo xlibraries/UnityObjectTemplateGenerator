@@ -33,17 +33,20 @@ public class JsonEditor : EditorWindow
         if (path.Length != 0)
         {
             string jsonString = File.ReadAllText(path);
-            JsonData template = JsonUtility.FromJson<JsonData>(jsonString);
+            JsonDataList templateList = JsonUtility.FromJson<JsonDataList>(jsonString);
 
-            GameObject obj = new(template.name);
-            obj.transform.position = template.position;
-            obj.transform.eulerAngles = template.rotation;
-            obj.transform.localScale = template.scale;
-
-            // If your JsonData class includes color and you want to apply it to a Renderer
-            if (obj.TryGetComponent<Renderer>(out var renderer))
+            foreach (JsonData template in templateList.data)
             {
-                renderer.material.color = template.color;
+                GameObject obj = new(template.name);
+                obj.transform.position = template.position;
+                obj.transform.eulerAngles = template.rotation;
+                obj.transform.localScale = template.scale;
+
+                // If your JsonData class includes color and you want to apply it to a Renderer
+                if (obj.TryGetComponent<Renderer>(out var renderer))
+                {
+                    renderer.material.color = template.color;
+                }
             }
         }
     }
