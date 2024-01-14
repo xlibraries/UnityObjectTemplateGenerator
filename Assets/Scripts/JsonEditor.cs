@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -9,13 +7,12 @@ public class JsonEditor : EditorWindow
 {
     protected JsonData newTemplate = new();
 
-    [MenuItem("Window/JSON Editor")]
-    public static void ShowWindow()
+    protected string GetJsonFilePath()
     {
-        GetWindow<JsonEditor>("JSON Editor");
+        return EditorUtility.OpenFilePanel("Select JSON File", "", "json");
     }
 
-    private void OnGUI()
+    protected virtual void OnGUI()
     {
         GUILayout.Label("JSON Editor", EditorStyles.boldLabel);
 
@@ -25,75 +22,29 @@ public class JsonEditor : EditorWindow
         newTemplate.rotation = EditorGUILayout.Vector3Field("Rotation", newTemplate.rotation);
         newTemplate.scale = EditorGUILayout.Vector3Field("Scale", newTemplate.scale);
         newTemplate.color = EditorGUILayout.ColorField("Color", newTemplate.color);
+    }
 
-        if (GUILayout.Button("Load JSON Data"))
+    [MenuItem("Window/JsonEditor/Instiante Objects")]
+    protected static void InstantiateGameObject()
+    {
+        // Assuming you have a method to get the path of the JSON file
+        string path = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
+
+        if (path.Length != 0)
         {
-            //LoadJsonEditor loadJsonEditor = new();
-            //loadJsonEditor.LoadJsonData();
-            ShowLoadWindow();
+            string jsonString = File.ReadAllText(path);
+            JsonData template = JsonUtility.FromJson<JsonData>(jsonString);
+
+            GameObject obj = new(template.name);
+            obj.transform.position = template.position;
+            obj.transform.eulerAngles = template.rotation;
+            obj.transform.localScale = template.scale;
+
+            // If your JsonData class includes color and you want to apply it to a Renderer
+            if (obj.TryGetComponent<Renderer>(out var renderer))
+            {
+                renderer.material.color = template.color;
+            }
         }
-
-        if (GUILayout.Button("Create JSON Data"))
-        {
-            //CreateJsonEditor createJsonEditor = new();
-            //createJsonEditor.CreateJsonData();
-            ShowCreateWindow();
-        }
-
-        if (GUILayout.Button("Update JSON Data"))
-        {
-            //UpdateJsonEditor updateJsonEditor = new();
-            //updateJsonEditor.UpdateJsonData();
-            ShowUpdateWindow();
-        }
-
-        if (GUILayout.Button("Delete JSON Data"))
-        {
-            //DeleteJsonEditor deleteJsonEditor = new();
-            //deleteJsonEditor.DeleteJsonData();
-            ShowDeleteWindow();
-        }
-
-        if (GUILayout.Button("Instantiate Game Object"))
-        {
-            //InstantiateJsonEditor instantiateJsonEditor = new();
-            //instantiateJsonEditor.InstantiateGameObject();
-            ShowInstantiateWindow();
-        }
-    }
-    protected string GetJsonFilePath()
-    {
-        return EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-    }
-
-    [MenuItem("Window/JSON Editor/Create")]
-    public static void ShowCreateWindow()
-    {
-        GetWindow<CreateJsonEditor>("Create JSON");
-    }
-
-    [MenuItem("Window/JSON Editor/Load")]
-    public static void ShowLoadWindow()
-    {
-        LoadJsonEditor loadJsonEditor = new();
-        loadJsonEditor.LoadJsonData();
-    }
-
-    [MenuItem("Window/JSON Editor/Update")]
-    public static void ShowUpdateWindow()
-    {
-        GetWindow<UpdateJsonEditor>("Update JSON");
-    }
-
-    [MenuItem("Window/JSON Editor/Delete")]
-    public static void ShowDeleteWindow()
-    {
-        GetWindow<DeleteJsonEditor>("Delete JSON");
-    }
-
-    [MenuItem("Window/JSON Editor/Instantiate")]
-    public static void ShowInstantiateWindow()
-    {
-        GetWindow<InstantiateJsonEditor>("Instantiate JSON");
     }
 }
