@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
 public class JsonData
@@ -8,4 +9,14 @@ public class JsonData
     public Vector3 rotation;
     public Vector3 scale;
     public Color color;
+    //public List<string> componentTypes;
+    public List<ComponentData> components;
+    //public List<Dictionary<string, object>> componentProperties;
+}
+
+[System.Serializable]
+public class ComponentData
+{
+    public string type;
+    public Dictionary<string, string> properties;
 }
