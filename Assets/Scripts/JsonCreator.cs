@@ -39,7 +39,7 @@ public class JsonCreator : JsonEditor
             GUILayout.Label($"Entry {i + 1}", EditorStyles.boldLabel);
 
             GUILayout.BeginHorizontal();
-            currentTemplate.name = EditorGUILayout.TextField("Name", currentTemplate.name);
+            currentTemplate.gameObjectType = EditorGUILayout.TextField("GameObject Type", currentTemplate.gameObjectType);
             if (GUILayout.Button("Delete This Entry"))
             {
                 newTemplates.RemoveAt(i);
@@ -47,6 +47,7 @@ public class JsonCreator : JsonEditor
             }
             GUILayout.EndHorizontal();
 
+            currentTemplate.name = EditorGUILayout.TextField("Name", currentTemplate.name);
             currentTemplate.parent = EditorGUILayout.TextField("Parent", currentTemplate.parent);
             currentTemplate.position = EditorGUILayout.Vector3Field("Position", currentTemplate.position);
             currentTemplate.rotation = EditorGUILayout.Vector3Field("Rotation", currentTemplate.rotation);
@@ -64,8 +65,8 @@ public class JsonCreator : JsonEditor
 
         EditorGUILayout.EndScrollView();
 
-        GUILayout.Label("Actions", EditorStyles.boldLabel);
         GUILayout.BeginHorizontal();
+        GUILayout.Label("Actions", EditorStyles.boldLabel);
         if (GUILayout.Button("Add New Entry"))
         {
             newTemplates.Add(new JsonData());

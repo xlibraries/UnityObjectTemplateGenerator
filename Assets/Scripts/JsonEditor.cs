@@ -26,31 +26,6 @@ public class JsonEditor : EditorWindow
     }
 
     [MenuItem("Window/JsonEditor/Instiante Objects")]
-    //protected static void InstantiateGameObject()
-    //{
-    //    // Assuming you have a method to get the path of the JSON file
-    //    string path = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-
-    //    if (path.Length != 0)
-    //    {
-    //        string jsonString = File.ReadAllText(path);
-    //        JsonDataList templateList = JsonUtility.FromJson<JsonDataList>(jsonString);
-
-    //        foreach (JsonData template in templateList.data)
-    //        {
-    //            GameObject obj = new(template.name);
-    //            obj.transform.position = template.position;
-    //            obj.transform.eulerAngles = template.rotation;
-    //            obj.transform.localScale = template.scale;
-
-    //            // If your JsonData class includes color and you want to apply it to a Renderer
-    //            if (obj.TryGetComponent<Renderer>(out var renderer))
-    //            {
-    //                renderer.material.color = template.color;
-    //            }
-    //        }
-    //    }
-    //}
     protected static void InstantiateGameObject()
     {
         string path = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
@@ -64,17 +39,7 @@ public class JsonEditor : EditorWindow
 
             foreach (JsonData template in templateList.data)
             {
-                GameObject obj = new GameObject(template.name);
-                obj.transform.position = template.position;
-                obj.transform.eulerAngles = template.rotation;
-                obj.transform.localScale = template.scale;
-
-                if (obj.TryGetComponent<Renderer>(out var renderer))
-                {
-                    renderer.material.color = template.color;
-                }
-
-                nameToObjectMap[template.name] = obj;
+                nameToObjectMap[template.name] = CreateGameObject(template);
             }
 
             foreach (JsonData template in templateList.data)
@@ -88,4 +53,34 @@ public class JsonEditor : EditorWindow
         }
     }
 
+    private static GameObject CreateGameObject(JsonData template)
+    {
+        GameObject obj = new GameObject(template.name);
+        obj.transform.position = template.position;
+        obj.transform.eulerAngles = template.rotation;
+        obj.transform.localScale = template.scale;
+
+        switch (template.gameObjectType)
+        {
+            case "Button":
+                obj.AddComponent<UnityEngine.UI.Button>();
+                obj.AddComponent<UnityEngine.UI.Image>();
+                break;
+            case "Text":
+                obj.AddComponent<UnityEngine.UI.Text>();
+                break;
+            case "Image":
+                obj.AddComponent<UnityEngine.UI.Image>();
+                break;
+            default:
+                break;
+        }
+
+        if (obj.TryGetComponent<Renderer>(out var renderer))
+        {
+            renderer.material.color = template.color;
+        }
+
+        return obj;
+    }
 }
