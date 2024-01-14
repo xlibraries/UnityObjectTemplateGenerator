@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class JsonEditor : EditorWindow
 {
-    private JsonData newTemplate = new();
+    protected JsonData newTemplate = new();
 
     [MenuItem("Window/JSON Editor")]
     public static void ShowWindow()
@@ -28,94 +28,72 @@ public class JsonEditor : EditorWindow
 
         if (GUILayout.Button("Load JSON Data"))
         {
-            LoadJsonData();
+            //LoadJsonEditor loadJsonEditor = new();
+            //loadJsonEditor.LoadJsonData();
+            ShowLoadWindow();
         }
 
         if (GUILayout.Button("Create JSON Data"))
         {
-            CreateJsonData();
+            //CreateJsonEditor createJsonEditor = new();
+            //createJsonEditor.CreateJsonData();
+            ShowCreateWindow();
         }
 
         if (GUILayout.Button("Update JSON Data"))
         {
-            UpdateJsonData();
+            //UpdateJsonEditor updateJsonEditor = new();
+            //updateJsonEditor.UpdateJsonData();
+            ShowUpdateWindow();
         }
 
         if (GUILayout.Button("Delete JSON Data"))
         {
-            DeleteJsonData();
+            //DeleteJsonEditor deleteJsonEditor = new();
+            //deleteJsonEditor.DeleteJsonData();
+            ShowDeleteWindow();
         }
 
         if (GUILayout.Button("Instantiate Game Object"))
         {
-            InstantiateGameObject();
+            //InstantiateJsonEditor instantiateJsonEditor = new();
+            //instantiateJsonEditor.InstantiateGameObject();
+            ShowInstantiateWindow();
         }
     }
-
-    private void InstantiateGameObject()
-    {
-        // Assuming you have a method to get the path of the JSON file
-        string path = GetJsonFilePath();
-
-        if (path.Length != 0)
-        {
-            string jsonString = File.ReadAllText(path);
-            JsonData template = JsonUtility.FromJson<JsonData>(jsonString);
-
-            GameObject obj = new(template.name);
-            obj.transform.position = template.position;
-            obj.transform.eulerAngles = template.rotation;
-            obj.transform.localScale = template.scale;
-
-            // If your JsonData class includes color and you want to apply it to a Renderer
-            if (obj.TryGetComponent<Renderer>(out var renderer))
-            {
-                renderer.material.color = template.color;
-            }
-        }
-    }
-
-    private string GetJsonFilePath()
+    protected string GetJsonFilePath()
     {
         return EditorUtility.OpenFilePanel("Select JSON File", "", "json");
     }
 
-    //Load JSON data
-    private void LoadJsonData()
+    [MenuItem("Window/JSON Editor/Create")]
+    public static void ShowCreateWindow()
     {
-        string path = GetJsonFilePath();
-        if (path.Length != 0)
-        {
-            string jsonString = File.ReadAllText(path);
-            newTemplate = JsonUtility.FromJson<JsonData>(jsonString);
-        }
+        GetWindow<CreateJsonEditor>("Create JSON");
     }
 
-    //Create JSON data
-    private void CreateJsonData()
+    [MenuItem("Window/JSON Editor/Load")]
+    public static void ShowLoadWindow()
     {
-        string path = EditorUtility.SaveFilePanel("Create JSON File", "", newTemplate.name, "json");
-        if (path.Length != 0)
-        {
-            string jsonString = JsonUtility.ToJson(newTemplate);
-            File.WriteAllText(path, jsonString);
-        }
+        LoadJsonEditor loadJsonEditor = new();
+        loadJsonEditor.LoadJsonData();
     }
 
-
-    //Edit JSON data
-    private void UpdateJsonData()
+    [MenuItem("Window/JSON Editor/Update")]
+    public static void ShowUpdateWindow()
     {
-        CreateJsonData();
+        GetWindow<UpdateJsonEditor>("Update JSON");
     }
 
-    //Delete JSON data
-    private void DeleteJsonData()
+    [MenuItem("Window/JSON Editor/Delete")]
+    public static void ShowDeleteWindow()
     {
-        string path = GetJsonFilePath();
-        if (path.Length != 0 && File.Exists(path))
-        {
-            File.Delete(path);
-        }
+        GetWindow<DeleteJsonEditor>("Delete JSON");
+    }
+
+    [MenuItem("Window/JSON Editor/Instantiate")]
+    public static void ShowInstantiateWindow()
+    {
+        GetWindow<InstantiateJsonEditor>("Instantiate JSON");
     }
 }
