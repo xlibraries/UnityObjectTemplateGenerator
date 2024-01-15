@@ -14,81 +14,7 @@ public class JsonCreator : JsonEditor
     {
         GetWindow<JsonCreator>("Create JSON");
     }
-
-    #region Old ONGUI
-    //protected override void OnGUI()
-    //{
-    //    if (newTemplates.Count == 0)
-    //    {
-    //        newTemplates.Add(new JsonData());
-    //    }
-
-    //    GUILayout.Label("JSON Editor", EditorStyles.boldLabel);
-    //    scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
-
-    //    for (int i = 0; i < newTemplates.Count; i++)
-    //    {
-    //        JsonData currentTemplate = newTemplates[i];
-
-    //        // Add a dark light color shade to separate entries
-    //        GUI.backgroundColor = new Color(0.8f, 0.8f, 0.8f);
-    //        EditorGUILayout.BeginVertical("box");
-    //        GUI.backgroundColor = Color.white;
-
-    //        GUILayout.BeginHorizontal();
-    //        currentTemplate.name = EditorGUILayout.TextField("Name", currentTemplate.name);
-    //        if (GUILayout.Button("Delete This Entry"))
-    //        {
-    //            newTemplates.RemoveAt(i);
-    //            break;
-    //        }
-    //        GUILayout.EndHorizontal();
-    //        currentTemplate.parent = EditorGUILayout.TextField("Parent", currentTemplate.parent);
-    //        currentTemplate.position = EditorGUILayout.Vector3Field("Position", currentTemplate.position);
-    //        currentTemplate.rotation = EditorGUILayout.Vector3Field("Rotation", currentTemplate.rotation);
-    //        currentTemplate.scale = EditorGUILayout.Vector3Field("Scale", currentTemplate.scale);
-    //        currentTemplate.color = EditorGUILayout.ColorField("Color", currentTemplate.color);
-
-    //        EditorGUILayout.EndVertical();
-    //        EditorGUILayout.Space();
-    //    }
-
-    //    GUILayout.EndScrollView();
-
-    //    GUILayout.BeginHorizontal();
-    //    if (GUILayout.Button("Add New Entry"))
-    //    {
-    //        newTemplates.Add(new JsonData());
-    //    }
-
-    //    if (GUILayout.Button("Add Child"))
-    //    {
-    //        if (currentTemplateIndex < 3)
-    //        {
-    //            JsonData child = new JsonData { parent = newTemplates[currentTemplateIndex].name };
-    //            newTemplates.Add(child);
-    //            currentTemplateIndex++;
-    //        }
-    //        else
-    //        {
-    //            Debug.Log("Cannot add more than 3 levels of hierarchy.");
-    //        }
-    //    }
-
-    //    if (GUILayout.Button("Add Parent"))
-    //    {
-    //        JsonData parent = new JsonData();
-    //        newTemplates.Insert(0, parent);
-    //        currentTemplateIndex = 0;
-    //    }
-    //    GUILayout.EndHorizontal();
-
-    //    if (GUILayout.Button("Create JSON Data"))
-    //    {
-    //        CreateJsonData();
-    //    }
-    //}
-    #endregion
+    
     protected override void OnGUI()
     {
         if (newTemplates.Count == 0)
@@ -173,7 +99,19 @@ public class JsonCreator : JsonEditor
         }
     }
 
-    private void CreateJsonData()
+    public string ChooseGameObjectType()
+    {
+        List<string> options = new(){ "Canvas","Button", "Text", "Image" };
+        int index = options.IndexOf(newTemplates[currentTemplateIndex].gameObjectType);
+        int newIndex = EditorGUILayout.Popup("GameObject Type", index, options.ToArray());
+        if (newIndex < 0)
+        {
+            newIndex = 0;
+        }
+        return options[newIndex];
+    }
+
+    public void CreateJsonData()
     {
         string path = EditorUtility.SaveFilePanel("Create JSON File", "", "", "json");
         if (path.Length != 0)
