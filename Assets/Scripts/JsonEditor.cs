@@ -59,7 +59,7 @@ public class JsonEditor : EditorWindow
         }
     }
 
-    private static GameObject CreateGameObject(JsonData template, ref GameObject canvas)
+    protected static GameObject CreateGameObject(JsonData template, ref GameObject canvas)
     {
         GameObject obj = new GameObject(template.name);
 
@@ -105,14 +105,28 @@ public class JsonEditor : EditorWindow
                 break;
         }
 
-        obj.transform.position = template.position;
-        obj.transform.eulerAngles = template.rotation;
-        obj.transform.localScale = template.scale;
-
-        if (obj.TryGetComponent<Renderer>(out var renderer))
+        try
         {
-            renderer.material.color = template.color;
+            //Set the position, rotation, scale, and color of the object
+            obj.GetComponent<RectTransform>().transform.position = template.position;
+            obj.GetComponent<RectTransform>().transform.eulerAngles = template.rotation;
+            obj.GetComponent<RectTransform>().transform.localScale = template.scale;
+            obj.GetComponent<SpriteRenderer>().color = template.color;
         }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+
+        //obj.transform.position = template.position;
+        //obj.transform.eulerAngles = template.rotation;
+        //obj.transform.localScale = template.scale;
+
+        //if (obj.TryGetComponent<Renderer>(out var renderer))
+        //{
+        //    renderer.material.color = template.color;
+        //}
 
         return obj;
     }

@@ -1,15 +1,11 @@
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 public class JsonLoader : JsonEditor
 {
-    [MenuItem("Window/JsonEditor/Load JSON")]
-    public static void ShowWindow()
-    {
-        GetWindow<JsonLoader>("Load JSON");
-    }
-
+    protected List<JsonData> newTemplates = new List<JsonData>();
     protected override void OnGUI()
     {
         //base.OnGUI();
@@ -20,13 +16,20 @@ public class JsonLoader : JsonEditor
         }
     }
 
-    private void LoadJsonData()
+    public void LoadJsonData()
     {
+        // Deserialize JSON to List<JsonData>
         string path = GetJsonFilePath();
-        if (path.Length != 0)
+        string json = File.ReadAllText(path);
+        List<JsonData> loadedTemplates = JsonUtility.FromJson<List<JsonData>>(json);
+
+        // Clear the current templates
+        newTemplates.Clear();
+
+        // Add loaded templates to newTemplates
+        foreach (JsonData template in loadedTemplates)
         {
-            string jsonString = File.ReadAllText(path);
-            newTemplate = JsonUtility.FromJson<JsonData>(jsonString);
+            newTemplates.Add(template);
         }
     }
 }
