@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class JsonEditor : EditorWindow
 {
@@ -36,10 +40,12 @@ public class JsonEditor : EditorWindow
             JsonDataList templateList = JsonUtility.FromJson<JsonDataList>(jsonString);
 
             Dictionary<string, GameObject> nameToObjectMap = new Dictionary<string, GameObject>();
+            GameObject canvas = GameObject.FindObjectOfType<Canvas>()?.gameObject;
 
             foreach (JsonData template in templateList.data)
             {
-                nameToObjectMap[template.name] = CreateGameObject(template);
+                GameObject obj = CreateGameObject(template, ref canvas);
+                nameToObjectMap[template.name] = obj;
             }
 
             foreach (JsonData template in templateList.data)
@@ -53,28 +59,55 @@ public class JsonEditor : EditorWindow
         }
     }
 
-    private static GameObject CreateGameObject(JsonData template)
+    private static GameObject CreateGameObject(JsonData template, ref GameObject canvas)
     {
         GameObject obj = new GameObject(template.name);
-        obj.transform.position = template.position;
-        obj.transform.eulerAngles = template.rotation;
-        obj.transform.localScale = template.scale;
 
         switch (template.gameObjectType)
         {
+            case "Canvas":
+                obj.AddComponent<CanvasScaler>();
+                obj.AddComponent<GraphicRaycaster>();
+                break;
             case "Button":
-                obj.AddComponent<UnityEngine.UI.Button>();
-                obj.AddComponent<UnityEngine.UI.Image>();
+                if (canvas == null)
+                {
+                    canvas = new GameObject("Canvas", typeof(Canvas));
+                }
+                // Set the parent of the button to the canvas
+                obj.transform.SetParent(canvas.transform);
+                obj.AddComponent<Button>();
+                obj.AddComponent<Image>();
+                // Set obj.AddComponent<TMPro.TextMeshPro>(); as child of the button
+                GameObject textObj = new("Text", typeof(TextMeshProUGUI));
+                textObj.GetComponent<TextMeshProUGUI>().text = template.name;
+                textObj.transform.SetParent(obj.transform);
                 break;
             case "Text":
-                obj.AddComponent<UnityEngine.UI.Text>();
+                if (canvas == null)
+                {
+                    canvas = new GameObject("Canvas", typeof(Canvas));
+                }
+                // Set the parent of the button to the canvas
+                obj.transform.SetParent(canvas.transform);
+                obj.AddComponent<TextMeshProUGUI>();
                 break;
             case "Image":
-                obj.AddComponent<UnityEngine.UI.Image>();
+                if (canvas == null)
+                {
+                    canvas = new GameObject("Canvas", typeof(Canvas));
+                }
+                // Set the parent of the button to the canvas
+                obj.transform.SetParent(canvas.transform);
+                obj.AddComponent<Image>();
                 break;
             default:
                 break;
         }
+
+        obj.transform.position = template.position;
+        obj.transform.eulerAngles = template.rotation;
+        obj.transform.localScale = template.scale;
 
         if (obj.TryGetComponent<Renderer>(out var renderer))
         {
@@ -83,4 +116,5 @@ public class JsonEditor : EditorWindow
 
         return obj;
     }
+
 }
