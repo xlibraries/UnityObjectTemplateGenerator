@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class JsonEditor : EditorWindow
 {
@@ -26,31 +30,6 @@ public class JsonEditor : EditorWindow
     }
 
     [MenuItem("Window/JsonEditor/Instiante Objects")]
-    //protected static void InstantiateGameObject()
-    //{
-    //    // Assuming you have a method to get the path of the JSON file
-    //    string path = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
-
-    //    if (path.Length != 0)
-    //    {
-    //        string jsonString = File.ReadAllText(path);
-    //        JsonDataList templateList = JsonUtility.FromJson<JsonDataList>(jsonString);
-
-    //        foreach (JsonData template in templateList.data)
-    //        {
-    //            GameObject obj = new(template.name);
-    //            obj.transform.position = template.position;
-    //            obj.transform.eulerAngles = template.rotation;
-    //            obj.transform.localScale = template.scale;
-
-    //            // If your JsonData class includes color and you want to apply it to a Renderer
-    //            if (obj.TryGetComponent<Renderer>(out var renderer))
-    //            {
-    //                renderer.material.color = template.color;
-    //            }
-    //        }
-    //    }
-    //}
     protected static void InstantiateGameObject()
     {
         string path = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
@@ -61,19 +40,11 @@ public class JsonEditor : EditorWindow
             JsonDataList templateList = JsonUtility.FromJson<JsonDataList>(jsonString);
 
             Dictionary<string, GameObject> nameToObjectMap = new Dictionary<string, GameObject>();
+            GameObject canvas = GameObject.FindObjectOfType<Canvas>()?.gameObject;
 
             foreach (JsonData template in templateList.data)
             {
-                GameObject obj = new GameObject(template.name);
-                obj.transform.position = template.position;
-                obj.transform.eulerAngles = template.rotation;
-                obj.transform.localScale = template.scale;
-
-                if (obj.TryGetComponent<Renderer>(out var renderer))
-                {
-                    renderer.material.color = template.color;
-                }
-
+                GameObject obj = CreateGameObject(template, ref canvas);
                 nameToObjectMap[template.name] = obj;
             }
 
@@ -86,6 +57,64 @@ public class JsonEditor : EditorWindow
                 }
             }
         }
+    }
+
+    private static GameObject CreateGameObject(JsonData template, ref GameObject canvas)
+    {
+        GameObject obj = new GameObject(template.name);
+
+        switch (template.gameObjectType)
+        {
+            case "Canvas":
+                obj.AddComponent<CanvasScaler>();
+                obj.AddComponent<GraphicRaycaster>();
+                break;
+            case "Button":
+                if (canvas == null)
+                {
+                    canvas = new GameObject("Canvas", typeof(Canvas));
+                }
+                // Set the parent of the button to the canvas
+                obj.transform.SetParent(canvas.transform);
+                obj.AddComponent<Button>();
+                obj.AddComponent<Image>();
+                // Set obj.AddComponent<TMPro.TextMeshPro>(); as child of the button
+                GameObject textObj = new("Text", typeof(TextMeshProUGUI));
+                textObj.GetComponent<TextMeshProUGUI>().text = template.name;
+                textObj.transform.SetParent(obj.transform);
+                break;
+            case "Text":
+                if (canvas == null)
+                {
+                    canvas = new GameObject("Canvas", typeof(Canvas));
+                }
+                // Set the parent of the button to the canvas
+                obj.transform.SetParent(canvas.transform);
+                obj.AddComponent<TextMeshProUGUI>();
+                break;
+            case "Image":
+                if (canvas == null)
+                {
+                    canvas = new GameObject("Canvas", typeof(Canvas));
+                }
+                // Set the parent of the button to the canvas
+                obj.transform.SetParent(canvas.transform);
+                obj.AddComponent<Image>();
+                break;
+            default:
+                break;
+        }
+
+        obj.transform.position = template.position;
+        obj.transform.eulerAngles = template.rotation;
+        obj.transform.localScale = template.scale;
+
+        if (obj.TryGetComponent<Renderer>(out var renderer))
+        {
+            renderer.material.color = template.color;
+        }
+
+        return obj;
     }
 
 }

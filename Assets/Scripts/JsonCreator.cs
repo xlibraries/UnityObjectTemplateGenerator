@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -17,7 +18,7 @@ public class JsonCreator : JsonEditor
 
     protected override void OnGUI()
     {
-        if (newTemplates.Count == 0)
+        if (newTemplates.Count <= 0)
         {
             newTemplates.Add(new JsonData());
         }
@@ -39,14 +40,23 @@ public class JsonCreator : JsonEditor
             GUILayout.Label($"Entry {i + 1}", EditorStyles.boldLabel);
 
             GUILayout.BeginHorizontal();
-            currentTemplate.name = EditorGUILayout.TextField("Name", currentTemplate.name);
+            //currentTemplate.gameObjectType = EditorGUILayout.TextField("GameObject Type", currentTemplate.gameObjectType);
+            currentTemplate.gameObjectType = ChooseGameObjectType();
             if (GUILayout.Button("Delete This Entry"))
             {
-                newTemplates.RemoveAt(i);
-                entryDeleted = true;
+                try
+                {
+                    newTemplates.RemoveAt(i);
+                    entryDeleted = true;
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
             }
             GUILayout.EndHorizontal();
 
+            currentTemplate.name = EditorGUILayout.TextField("Name", currentTemplate.name);
             currentTemplate.parent = EditorGUILayout.TextField("Parent", currentTemplate.parent);
             currentTemplate.position = EditorGUILayout.Vector3Field("Position", currentTemplate.position);
             currentTemplate.rotation = EditorGUILayout.Vector3Field("Rotation", currentTemplate.rotation);
@@ -64,8 +74,8 @@ public class JsonCreator : JsonEditor
 
         EditorGUILayout.EndScrollView();
 
-        GUILayout.Label("Actions", EditorStyles.boldLabel);
         GUILayout.BeginHorizontal();
+        GUILayout.Label("Actions", EditorStyles.boldLabel);
         if (GUILayout.Button("Add New Entry"))
         {
             newTemplates.Add(new JsonData());
@@ -97,6 +107,18 @@ public class JsonCreator : JsonEditor
         {
             CreateJsonData();
         }
+    }
+
+    private string ChooseGameObjectType()
+    {
+        List<string> options = new(){ "Canvas","Button", "Text", "Image" };
+        int index = options.IndexOf(newTemplates[currentTemplateIndex].gameObjectType);
+        int newIndex = EditorGUILayout.Popup("GameObject Type", index, options.ToArray());
+        if (newIndex < 0)
+        {
+            newIndex = 0;
+        }
+        return options[newIndex];
     }
 
     private void CreateJsonData()

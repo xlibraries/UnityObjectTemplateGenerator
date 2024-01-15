@@ -10,4 +10,5 @@ public class JsonData
     public Vector3 rotation;
     public Vector3 scale;
     public Color color;
+    public string gameObjectType;
 }
