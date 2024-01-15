@@ -10,6 +10,8 @@ public class JsonCreator : JsonEditor
     protected int currentTemplateIndex = 0;
     protected Vector2 scrollPosition;
 
+    private string filename = "File Name";
+
     [MenuItem("Window/JsonEditor/Create JSON")]
     public static void ShowWindow()
     {
@@ -24,6 +26,7 @@ public class JsonCreator : JsonEditor
         }
 
         GUILayout.Label("JSON Editor", EditorStyles.boldLabel);
+        filename = EditorGUILayout.TextField("Filename", filename);
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
         bool entryDeleted = false;
@@ -48,13 +51,19 @@ public class JsonCreator : JsonEditor
                 {
                     newTemplates.RemoveAt(i);
                     entryDeleted = true;
+                    currentTemplateIndex = Mathf.Max(0, i - 1);
                 }
                 catch (Exception)
                 {
-                    // ignored
+                    Debug.Log("Cannot delete the last entry.");
                 }
             }
             GUILayout.EndHorizontal();
+            if (entryDeleted)
+            {
+                EditorGUILayout.EndVertical();
+                break;
+            }
 
             currentTemplate.name = EditorGUILayout.TextField("Name", currentTemplate.name);
             currentTemplate.parent = EditorGUILayout.TextField("Parent", currentTemplate.parent);
@@ -64,12 +73,7 @@ public class JsonCreator : JsonEditor
             currentTemplate.color = EditorGUILayout.ColorField("Color", currentTemplate.color);
 
             EditorGUILayout.EndVertical();
-            EditorGUILayout.Space();
 
-            if (entryDeleted)
-            {
-                break;
-            }
         }
 
         EditorGUILayout.EndScrollView();
@@ -101,29 +105,74 @@ public class JsonCreator : JsonEditor
             newTemplates.Insert(0, parent);
             currentTemplateIndex = 0;
         }
+
+        if (GUILayout.Button("Delete All Entries"))
+        {
+            newTemplates.Clear();
+            newTemplates.Add(new JsonData());
+        }
         GUILayout.EndHorizontal();
 
-        if (GUILayout.Button("Create JSON Data"))
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Create JSON"))
         {
             CreateJsonData();
+        }
+        if (GUILayout.Button("Load JSON"))
+        {
+            LoadJson();
+            //JsonLoader jsonLoader = new();
+            //jsonLoader.LoadJsonData();
+        }
+        if (GUILayout.Button("Update JSON"))
+        {
+            CreateJsonData();
+        }
+        GUILayout.EndHorizontal();
+    }
+
+    private void LoadJson()
+    {
+        // Read JSON file and add entries to based on the JSON data
+        string path = EditorUtility.OpenFilePanel("Select JSON File", "", "json");
+        if (path.Length != 0)
+        {
+            string jsonString = File.ReadAllText(path);
+            JsonDataList templateList = JsonUtility.FromJson<JsonDataList>(jsonString);
+
+            // Clear the current templates
+            newTemplates.Clear();
+
+            // Add loaded templates to newTemplates
+            foreach (JsonData template in templateList.data)
+            {
+                newTemplates.Add(template);
+            }
         }
     }
 
     private string ChooseGameObjectType()
     {
-        List<string> options = new(){ "Canvas","Button", "Text", "Image" };
-        int index = options.IndexOf(newTemplates[currentTemplateIndex].gameObjectType);
-        int newIndex = EditorGUILayout.Popup("GameObject Type", index, options.ToArray());
-        if (newIndex < 0)
+        List<string> options = new() { "Canvas", "Button", "Text", "Image" };
+        try
         {
-            newIndex = 0;
+            int index = options.IndexOf(newTemplates[currentTemplateIndex].gameObjectType);
+            int newIndex = EditorGUILayout.Popup("GameObject Type", index, options.ToArray());
+            if (newIndex < 0)
+            {
+                newIndex = 0;
+            }
+            return options[newIndex];
         }
-        return options[newIndex];
+        catch (Exception)
+        {
+            return options[1];
+        }
     }
 
     private void CreateJsonData()
     {
-        string path = EditorUtility.SaveFilePanel("Create JSON File", "", "", "json");
+        string path = EditorUtility.SaveFilePanel("Create JSON File", "", filename, "json");
         if (path.Length != 0)
         {
             JsonDataList jsonDataList = new JsonDataList { data = newTemplates };
