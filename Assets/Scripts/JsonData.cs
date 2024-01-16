@@ -5,6 +5,7 @@ using UnityEngine;
 public class JsonData
 {
     public string name;
+    public string tag;
     public string parent;
     public Vector3 position;
     public Vector3 rotation;

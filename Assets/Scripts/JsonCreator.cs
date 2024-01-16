@@ -67,6 +67,7 @@ public class JsonCreator : JsonEditor
 
             currentTemplate.name = EditorGUILayout.TextField("Name", currentTemplate.name);
             currentTemplate.parent = EditorGUILayout.TextField("Parent", currentTemplate.parent);
+            currentTemplate.tag = EditorGUILayout.TextField("Tag", currentTemplate.tag);
             currentTemplate.position = EditorGUILayout.Vector3Field("Position", currentTemplate.position);
             currentTemplate.rotation = EditorGUILayout.Vector3Field("Rotation", currentTemplate.rotation);
             currentTemplate.scale = EditorGUILayout.Vector3Field("Scale", currentTemplate.scale);
